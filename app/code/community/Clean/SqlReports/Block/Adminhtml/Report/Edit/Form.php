@@ -75,5 +75,42 @@ class Clean_SqlReports_Block_Adminhtml_Report_Edit_Form extends Mage_Adminhtml_B
             'label'     => Mage::helper('core')->__('Grid Configuration'),
             'style'     => 'width: 640px; height: 200px;'
         ));
+
+        $fieldset->addField('cron_job_code', 'text', array(
+            'name'      => 'report[cron_job_code]',
+            'label'     => Mage::helper('core')->__('Cron Job Name'),
+            'required'  => false,
+        ));
+
+        $fieldset->addField('cron_expr', 'text', array(
+            'name'      => 'report[cron_expr]',
+            'label'     => Mage::helper('core')->__('Cron Expression'),
+            'required'  => false,
+        ));
+
+        $fieldset->addField('cron_export_type', 'select', array(
+            'name'      => 'report[cron_export_type]',
+            'label'     => Mage::helper('core')->__('Cron Export Type'),
+            'values' => Mage::getModel('cleansql/config_exportType')->toOptionArray(),
+            'required'  => false,
+        ));
+
+        $sftpConfig = Mage::getModel('cleansql/config_sftpConfig')->toOptionArray();
+        if (!empty($sftpConfig)) {
+            $fieldset->addField('cron_sftp_config', 'select', array(
+                'name' => 'report[cron_sftp_config]',
+                'label' => Mage::helper('core')->__('Cron SFTP Configuration'),
+                'values' => $sftpConfig,
+                'required' => false,
+            ));
+
+            $fieldset->addField('cron_sftp_file_name', 'text', array(
+                'name'      => 'report[cron_sftp_file_name]',
+                'label'     => Mage::helper('core')->__('Cron SFTP File Name'),
+                'required'  => false,
+            ));
+
+        }
+
     }
 }

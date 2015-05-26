@@ -106,4 +106,50 @@ class Clean_SqlReports_Block_Adminhtml_Report_View_Grid extends Mage_Adminhtml_B
 
         return parent::_prepareColumns();
     }
+
+    public function getTsvFile()
+    {
+        $this->_isExport = true;
+        $this->_prepareGrid();
+
+        $io = new Varien_Io_File();
+
+        $path = Mage::getBaseDir('var') . DS . 'export' . DS;
+        $name = md5(microtime());
+        $file = $path . DS . $name . '.tsv';
+
+        $io->setAllowCreateFolders(true);
+        $io->open(array('path' => $path));
+        $io->streamOpen($file, 'w+');
+        $io->streamLock(true);
+        $io->streamWriteCsv($this->_getExportHeaders(), "\t");
+
+        $this->_exportIterateCollection('_exportTsvItem', array($io));
+
+        if ($this->getCountTotals()) {
+            $io->streamWriteCsv($this->_getExportTotals(), "\t");
+        }
+
+        $io->streamUnlock();
+        $io->streamClose();
+
+        return array(
+            'type'  => 'filename',
+            'value' => $file,
+            'rm'    => true // can delete file after use
+        );
+    }
+
+    protected function _exportTsvItem(Varien_Object $item, Varien_Io_File $adapter)
+    {
+        $row = array();
+        foreach ($this->_columns as $column) {
+            if (!$column->getIsSystem()) {
+                $row[] = $column->getRowFieldExport($item);
+            }
+        }
+        $adapter->streamWriteCsv($row, "\t");
+    }
+
+
 }

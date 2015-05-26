@@ -57,6 +57,13 @@ class Clean_SqlReports_Adminhtml_ReportController extends Mage_Adminhtml_Control
         $report->addData($postData['report']);
         $report->save();
 
+        $postReportData = $postData['report'];
+        if (isset($postReportData['cron_expr']) && isset($postReportData['cron_job_code'])) {
+            Mage::getModel('core/config')->saveConfig('crontab/jobs/' . $postReportData['cron_job_code'] . '/schedule/cron_expr/', $postReportData['cron_expr']);
+            Mage::getModel('core/config')->saveConfig('crontab/jobs/' . $postReportData['cron_job_code'] . '/run/model/', 'cleansql/observer::runReportExport');
+            Mage::app()->getCache()->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, array(Mage_Core_Model_Config::CACHE_TAG));
+        }
+
         Mage::getSingleton('adminhtml/session')->addSuccess($this->__("Saved report: %s", $report->getTitle()));
 
         $this->_redirect('*/*');
