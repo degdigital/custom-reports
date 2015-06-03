@@ -58,7 +58,7 @@ class Clean_SqlReports_Adminhtml_ReportController extends Mage_Adminhtml_Control
         $report->save();
 
         $postReportData = $postData['report'];
-        if (isset($postReportData['cron_expr']) && isset($postReportData['cron_job_code'])) {
+        if (!empty($postReportData['cron_expr']) && !empty($postReportData['cron_job_code'])) {
             Mage::getModel('core/config')->saveConfig('crontab/jobs/' . $postReportData['cron_job_code'] . '/schedule/cron_expr/', $postReportData['cron_expr']);
             Mage::getModel('core/config')->saveConfig('crontab/jobs/' . $postReportData['cron_job_code'] . '/run/model/', 'cleansql/observer::runReportExport');
             Mage::app()->getCache()->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, array(Mage_Core_Model_Config::CACHE_TAG));
@@ -81,6 +81,10 @@ class Clean_SqlReports_Adminhtml_ReportController extends Mage_Adminhtml_Control
         }
 
         $report->delete();
+
+        Mage::getModel('core/config')->deleteConfig('crontab/jobs/' . $report->getCronJobCode() . '/schedule/cron_expr/');
+        Mage::getModel('core/config')->deleteConfig('crontab/jobs/' . $report->getCronJobCode() . '/run/model/');
+        Mage::app()->getCache()->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, array(Mage_Core_Model_Config::CACHE_TAG));
 
         Mage::getSingleton('adminhtml/session')->addSuccess($this->__("Deleted report: %s", $report->getTitle()));
 
